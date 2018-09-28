@@ -1,12 +1,9 @@
 package main
 
 import (
-	"github.com/Shopify/sarama"
-
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,11 +11,13 @@ import (
 	"os"
 	"strings"
 	"time"
+	flag "github.com/bborbe/flagenv"
+	"github.com/Shopify/sarama"
 )
 
 var (
 	addr      = flag.String("addr", ":8080", "The address to bind to")
-	brokers   = flag.String("brokers", os.Getenv("KAFKA_PEERS"), "The Kafka brokers to connect to, as a comma separated list")
+	brokers   = flag.String("brokers", "kafka:9092", "The Kafka brokers to connect to, as a comma separated list")
 	verbose   = flag.Bool("verbose", false, "Turn on Sarama logging")
 	certFile  = flag.String("certificate", "", "The optional certificate file for client authentication")
 	keyFile   = flag.String("key", "", "The optional key file for client authentication")
