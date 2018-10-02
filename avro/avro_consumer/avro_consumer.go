@@ -46,9 +46,6 @@ func main() {
 	}
 
 	config := sarama.NewConfig()
-	config.Producer.RequiredAcks = sarama.WaitForAll
-	config.Producer.Retry.Max = 10
-	config.Producer.Return.Successes = true
 
 	httpServer := &http.Server{
 		Addr: *addr,
