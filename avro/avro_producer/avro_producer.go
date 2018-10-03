@@ -44,6 +44,7 @@ func main() {
 		os.Exit(1)
 	}
 	config := sarama.NewConfig()
+	config.Version = sarama.V2_0_0_0
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Retry.Max = 10
 	config.Producer.Return.Successes = true

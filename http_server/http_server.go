@@ -193,6 +193,7 @@ func newDataCollector(brokerList []string) sarama.SyncProducer {
 	// Because we don't change the flush settings, sarama will try to produce messages
 	// as fast as possible to keep latency low.
 	config := sarama.NewConfig()
+	config.Version = sarama.V2_0_0_0
 	config.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
 	config.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
 	config.Producer.Return.Successes = true
@@ -220,6 +221,7 @@ func newAccessLogProducer(brokerList []string) sarama.AsyncProducer {
 	// For the access log, we are looking for AP semantics, with high throughput.
 	// By creating batches of compressed messages, we reduce network I/O at a cost of more latency.
 	config := sarama.NewConfig()
+	config.Version = sarama.V2_0_0_0
 	tlsConfig := createTlsConfiguration()
 	if tlsConfig != nil {
 		config.Net.TLS.Enable = true

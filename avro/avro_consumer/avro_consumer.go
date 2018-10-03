@@ -46,6 +46,7 @@ func main() {
 	}
 
 	config := sarama.NewConfig()
+	config.Version = sarama.V2_0_0_0
 
 	httpServer := &http.Server{
 		Addr: *addr,
