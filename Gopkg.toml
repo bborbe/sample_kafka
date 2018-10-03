@@ -27,7 +27,19 @@
 
 [[constraint]]
   name = "github.com/Shopify/sarama"
-  version = "1.18.0"
+  version = "1.19.0"
+
+[[constraint]]
+  name = "github.com/actgardner/gogen-avro"
+  version = "5.1.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/bborbe/flagenv"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/golang/glog"
 
 [prune]
   go-tests = true
