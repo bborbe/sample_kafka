@@ -52,8 +52,13 @@ func main() {
 	httpServer := &http.Server{
 		Addr: *addr,
 		Handler: http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-
-			producer, err := sarama.NewSyncProducer(strings.Split(*brokers, ","), config)
+			client, err := sarama.NewClient(strings.Split(*brokers, ","), config)
+			if err != nil {
+				glog.Warning(err)
+				http.Error(resp, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			producer, err := sarama.NewSyncProducerFromClient(client)
 			if err != nil {
 				glog.Warning(err)
 				http.Error(resp, err.Error(), http.StatusInternalServerError)
