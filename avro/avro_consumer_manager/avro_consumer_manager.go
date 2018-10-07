@@ -17,9 +17,10 @@ import (
 )
 
 var (
-	addr    = flag.String("addr", ":8002", "The address to bind to")
+	addr    = flag.String("addr", ":8003", "The address to bind to")
 	brokers = flag.String("brokers", "kafka:9092", "The Kafka brokers to connect to, as a comma separated list")
 	verbose = flag.Bool("verbose", false, "Turn on Sarama logging")
+	group   = flag.String("group", "a", "Group")
 )
 
 const topic = "sample_avro"
@@ -35,6 +36,7 @@ func main() {
 	glog.V(0).Infof("addr %s", *addr)
 	glog.V(0).Infof("brokers %s", *brokers)
 	glog.V(0).Infof("verbose %v", *verbose)
+	glog.V(0).Infof("group %v", *group)
 
 	if *verbose {
 		sarama.Logger = log.New(os.Stdout, "[sarama] ", log.LstdFlags)
@@ -47,6 +49,7 @@ func main() {
 
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_0_0_0
+	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
 	httpServer := &http.Server{
 		Addr: *addr,
@@ -59,6 +62,14 @@ func main() {
 			}
 			defer client.Close()
 
+			offsetManager, err := sarama.NewOffsetManagerFromClient(*group, client)
+			if err != nil {
+				glog.Warning(err)
+				http.Error(resp, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer offsetManager.Close()
+
 			consumer, err := sarama.NewConsumerFromClient(client)
 			if err != nil {
 				glog.Warning(err)
@@ -67,7 +78,18 @@ func main() {
 			}
 			defer consumer.Close()
 
-			partitionConsumer, err := consumer.ConsumePartition(topic, 0, sarama.OffsetOldest)
+			partitionOffsetManager, err := offsetManager.ManagePartition(topic, 0)
+			if err != nil {
+				glog.Warning(err)
+				http.Error(resp, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer partitionOffsetManager.Close()
+
+			offset, s := partitionOffsetManager.NextOffset()
+			glog.V(1).Infof("offset: %d %s", offset, s)
+
+			partitionConsumer, err := consumer.ConsumePartition(topic, 0, offset)
 			if err != nil {
 				glog.Warning(err)
 				http.Error(resp, err.Error(), http.StatusInternalServerError)
@@ -80,6 +102,10 @@ func main() {
 
 			for {
 				select {
+				case err := <-partitionOffsetManager.Errors():
+					glog.Warning(err)
+					http.Error(resp, err.Error(), http.StatusInternalServerError)
+					return
 				case err := <-partitionConsumer.Errors():
 					glog.Warning(err)
 					http.Error(resp, err.Error(), http.StatusInternalServerError)
@@ -92,7 +118,8 @@ func main() {
 						http.Error(resp, err.Error(), http.StatusInternalServerError)
 						return
 					}
-					fmt.Fprintf(resp, "found schema: %+v\n", demoSchema)
+					partitionOffsetManager.MarkOffset(msg.Offset+1, "banana")
+					fmt.Fprintf(resp, "msg %d schema: %+v\n", msg.Offset, demoSchema)
 				case <-ctx.Done():
 					return
 				}
