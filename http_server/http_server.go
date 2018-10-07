@@ -11,8 +11,9 @@ import (
 	"os"
 	"strings"
 	"time"
-	flag "github.com/bborbe/flagenv"
+
 	"github.com/Shopify/sarama"
+	flag "github.com/bborbe/flagenv"
 )
 
 var (

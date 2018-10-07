@@ -9,8 +9,9 @@ import (
 	"runtime"
 	"strings"
 	"time"
-	flag "github.com/bborbe/flagenv"
+
 	"github.com/Shopify/sarama"
+	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/sample_kafka/avro/avro"
 	"github.com/golang/glog"
 )

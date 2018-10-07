@@ -3,17 +3,18 @@ package main
 import (
 	"bytes"
 	"context"
-	flag "github.com/bborbe/flagenv"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
+	"time"
+
 	"github.com/Shopify/sarama"
+	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/sample_kafka/avro/avro"
 	"github.com/golang/glog"
-	"time"
 )
 
 var (
