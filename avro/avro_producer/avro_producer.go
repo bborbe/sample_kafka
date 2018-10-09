@@ -82,7 +82,12 @@ func main() {
 				BytesField:  []byte{1, 2, 3, 4},
 			}
 			b := &bytes.Buffer{}
-			demoStruct.Serialize(b)
+			err = demoStruct.Serialize(b)
+			if err != nil {
+				glog.Warning(err)
+				http.Error(resp, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			partition, offset, err := producer.SendMessage(&sarama.ProducerMessage{
 				Topic: topic,
 				Value: sarama.ByteEncoder(b.Bytes()),
